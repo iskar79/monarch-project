@@ -1,57 +1,93 @@
 .container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* 뷰포트 높이만큼 최소 높이 설정 */
-    background-color: #fff; /* 흰색 배경 */
+    align-items: flex-start; /* 콘텐츠를 상단에 정렬 */
+    min-height: 100vh;
+    background-color: #f8f9fa; /* 약간의 회색 배경 */
+    padding: 40px 20px;
+    box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    padding: 20px; /* 컨테이너 자체에 약간의 패딩 */
-    box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
 }
 
 .contentWrapper {
+    width: 100%;
+    max-width: 1200px;
+    background-color: #ffffff;
     padding: 40px;
-    background-color: #ffffff; /* 흰색 콘텐츠 박스 */
-    border: 1px solid #e9ecef; /* 경계를 위한 옅은 회색 테두리 */
-    border-radius: 16px; /* 부드러운 둥근 모서리 */
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15); /* 둥둥 떠있는 느낌을 위한 그림자 강화 */
-    width: 90%;
-    max-width: 800px; /* 메인 페이지는 로그인보다 넓게 */
-    text-align: left; /* 콘텐츠는 왼쪽 정렬 */
-    transition: all 0.3s ease;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
 .header {
     margin-bottom: 32px;
-    text-align: center; /* 헤더는 중앙 정렬 */
 }
 
 .title {
     font-size: 32px;
     font-weight: 700;
-    color: #212529;
-    margin-bottom: 8px;
+    color: #212529; /* 어두운 색상 */
 }
 
 .subtitle {
-    font-size: 16px;
-    color: #868e96;
+    margin-top: 8px;
+    font-size: 18px;
+    color: #6c757d; /* 회색 계열 */
 }
 
 .message {
-    margin-top: 20px;
-    margin-bottom: 30px;
-    font-size: 18px;
-    color: #333;
-    line-height: 1.6;
+    font-size: 16px;
+    color: #495057; /* 약간 어두운 회색 */
+    margin-bottom: 24px;
+}
+
+.userDataSection {
+    margin-top: 40px;
+    text-align: left;
+    overflow-x: auto; /* 테이블이 넓을 경우 스크롤 생성 */
+}
+
+.userDataTitle {
+    font-size: 24px;
+    color: #343a40;
+    margin-bottom: 16px;
+}
+
+.userDataTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+.userDataTable th, .userDataTable td {
+    border: 1px solid #dee2e6;
+    padding: 12px 15px;
+    text-align: left;
+    color: #495057; /* 테이블 텍스트 색상 */
+}
+
+.userDataTable th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #343a40;
+}
+
+.honorific {
+    font-size: 20px; /* '님' 글자를 작게 표시 */
+    font-weight: 500; /* 기본 굵기보다 약간 가늘게 */
+    vertical-align: middle; /* 세로 정렬을 맞춤 */
+}
+
+.userDataTable tr:nth-child(even) {
+    background-color: #f8f9fa;
 }
 
 .logoutButton {
-    width: auto; /* 버튼 너비 자동 */
+    margin-top: 30px;
     padding: 12px 24px;
     border: none;
     border-radius: 6px;
-    background-color: #343a40; /* 세련된 다크 그레이 버튼 */
+    background-color: #dc3545; /* 로그아웃 버튼은 빨간색 계열 */
     color: white;
     font-size: 16px;
     font-weight: bold;
@@ -60,18 +96,29 @@
 }
 
 .logoutButton:hover {
-    background-color: #495057;
+    background-color: #c82333;
 }
 
-/* 화면 너비가 480px 이하일 때 적용될 스타일 (모바일 대응) */
-@media (max-width: 480px) {
-    .contentWrapper {
-        box-shadow: none;
-        border-radius: 0;
-        padding: 20px;
-        width: 100%;
-    }
-    .container {
-        padding: 0;
-    }
+.error, .loading, .noData {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+.error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+.loading {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+}
+
+.noData {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
 }

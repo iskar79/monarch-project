@@ -20,10 +20,20 @@ const LoginPage: React.FC = () => {
 
         try {
             await axios.post('/api/login', formData);
-            navigate('/'); // 로그인 성공 시 메인 페이지('/')로 이동합니다.
+
+            // 로그인 성공 후, 이제 모든 상세 정보를 포함한 사용자 정보를 가져옵니다.
+            const response = await axios.get('/api/user/info');
+            const user = response.data;
+
+            // sessionStorage에 전체 사용자 정보를 저장합니다.
+            sessionStorage.removeItem('loginError');
+            sessionStorage.setItem('user', JSON.stringify(user));
+
+            navigate('/'); // 메인 페이지로 이동합니다.
         } catch (err) {
             setError('Login failed. Please check your username and password.');
             console.error('Login error:', err);
+            sessionStorage.setItem('loginError', 'Login failed. Please check your username and password.');
         }
     };
 
