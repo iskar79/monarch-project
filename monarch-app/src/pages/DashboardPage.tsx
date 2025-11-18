@@ -15,7 +15,10 @@ const DashboardPage: React.FC = () => {
         { id: 'customerStatus', Component: CustomerStatusWidget, condition: location.pathname === '/' },
         { id: 'salesStatus', Component: SalesStatusWidget, condition: true },
         // 아래는 예시 위젯입니다. 실제 위젯으로 교체할 수 있습니다.
+        { id: 'newWidget1', Component: () => <Widget title="새로운 위젯 1"><div>콘텐츠 준비 중...</div></Widget>, condition: true },
         { id: 'newWidget2', Component: () => <Widget title="새로운 위젯 2"><div>콘텐츠 준비 중...</div></Widget>, condition: true },
+        { id: 'newWidget3', Component: () => <Widget title="새로운 위젯 3"><div>콘텐츠 준비 중...</div></Widget>, condition: true },
+        { id: 'newWidget4', Component: () => <Widget title="새로운 위젯 4"><div>콘텐츠 준비 중...</div></Widget>, condition: true },
     ];
 
     return (

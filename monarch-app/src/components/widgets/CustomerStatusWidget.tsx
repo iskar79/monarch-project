@@ -76,7 +76,7 @@ const CustomerStatusWidget: React.FC = () => {
                         height={"250px"} // 테이블 공간을 위해 차트 높이 조정
                     />
                     <div className={styles.tableContainer} style={{ marginTop: '20px', maxHeight: '200px' }}>
-                        <table className={styles.userDataTable}>
+                        <table className={`${styles.userDataTable} ${styles.tableFixedMobile}`}>
                             <thead>
                                 <tr>
                                     <th className={styles.textCenter}>고객 등급</th>

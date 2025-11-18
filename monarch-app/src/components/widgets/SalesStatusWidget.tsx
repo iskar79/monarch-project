@@ -78,17 +78,19 @@ const SalesStatusWidget: React.FC = () => {
                         height={"250px"} // 테이블 공간을 위해 차트 높이 조정
                     />
                     <div className={styles.tableContainer} style={{ marginTop: '20px', maxHeight: '200px' }}>
-                        <table className={styles.userDataTable}>
+                        <table className={`${styles.userDataTable} ${styles.tableFixedMobile}`}>
                             <thead>
                                 <tr>
                                     <th className={styles.textCenter}>영업 단계</th>
                                     <th className={styles.textRight}>건수</th>
+                                    <th className={styles.textRight}>건수</th> {/* 헤더는 이미 오른쪽 정렬 */}
                                 </tr>
                             </thead>
                             <tbody>
                                 {chartData.slice(1).map((row, index) => ( // 헤더를 제외하고 데이터만 렌더링
                                     <tr key={index}>
                                         <td>{String(row[0])}</td>
+                                        <td className={styles.textCenter}>{String(row[0])}</td> {/* 데이터 셀도 가운데 정렬로 변경 */}
                                         <td className={styles.textRight}>{Number(row[1]).toLocaleString()}</td>
                                     </tr>
                                 ))}
