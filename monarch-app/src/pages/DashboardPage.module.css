@@ -1,0 +1,15 @@
+.pageContent {
+    padding: 20px;
+}
+
+.pageTitle {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.widgetGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}

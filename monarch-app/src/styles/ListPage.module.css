@@ -1,0 +1,276 @@
+.pageContent {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); /* 그림자를 더 강조하여 떠 있는 느낌을 줍니다. */
+    box-sizing: border-box;
+    margin: 20px; /* 모든 방향에 20px의 여백을 추가합니다. */
+    min-width: 300px; /* 모바일에서 너무 작아지지 않도록 최소 너비 설정 */
+}
+
+.pageTitle {
+    font-size: 28px;
+    font-weight: 700;
+    color: #343a40;
+    margin-bottom: 24px;
+    flex-shrink: 0; /* 제목 높이가 줄어들지 않도록 고정 */
+}
+
+.filterContainer {
+    display: flex;
+    flex-direction: column; /* 세로로 쌓도록 변경 */
+    gap: 10px;
+    margin-bottom: 24px;
+    align-items: flex-start; /* 왼쪽 정렬 */
+}
+
+.filterRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+}
+
+.filterSelect, .filterInput {
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: #f8f9fa;
+    color: #495057; /* 글자 색상 추가 */
+    transition: border-color 0.2s;
+}
+.dateInput {
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: #f8f9fa;
+    color: #495057;
+    transition: border-color 0.2s;
+    color-scheme: light; /* 달력 아이콘이 항상 보이도록 설정 */
+    /* 텍스트를 선택할 수 없도록 하여, 클릭 시 달력이 뜨는 것을 방해하지 않도록 합니다. */
+    user-select: none;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+}
+
+/* input을 감싸는 label이 input처럼 보이도록 설정 */
+.dateInputLabel {
+    display: block;
+    cursor: pointer;
+}
+
+/* Webkit 브라우저 (Chrome, Edge 등)의 달력 아이콘 스타일 */
+.dateInput::-webkit-calendar-picker-indicator {
+    opacity: 1; /* 아이콘이 투명해지지 않도록 */
+    display: block; /* 아이콘이 숨겨지지 않도록 */
+    cursor: pointer;
+}
+
+/* 선택되지 않았을 때의 스타일 */
+.filterSelect:invalid {
+    color: #868e96; /* 플레이스홀더 색상과 동일하게 맞춤 */
+}
+
+.filterSelect:focus, .filterInput:focus, .dateInput:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.filterInput {
+    flex-grow: 1; /* 남은 공간을 모두 차지 */
+    min-width: 200px;
+}
+
+.filterInput::placeholder {
+    color: #868e96; /* 플레이스홀더 색상을 더 진하게 변경 */
+}
+
+.dateSeparator {
+    color: #868e96;
+    font-weight: 600;
+}
+
+.searchButton {
+    padding: 10px 20px;
+    background-color: #007bff; /* 파란색 버튼으로 변경 */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;    
+    margin-left: auto; /* 버튼을 오른쪽 끝으로 밀어냄 */
+}
+
+.userDataSection {
+    margin-top: 20px;
+    text-align: left;    
+}
+
+
+.userDataTitle {
+    font-size: 22px;
+    color: #343a40;
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.userDataTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.userDataTable th, .userDataTable td {
+    border: 1px solid #dee2e6;
+    padding: 12px 15px;
+    text-align: left;
+    color: #495057;
+    white-space: nowrap; /* 테이블 셀 내용이 길어도 줄바꿈되지 않도록 하여 가로 스크롤 유도 */
+}
+
+.userDataTable th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #343a40;
+}
+
+.userDataTable tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.paginationWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    flex-shrink: 0; /* 페이징 영역 높이가 줄어들지 않도록 고정 */
+}
+
+.totalCount {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.tableContainer {
+    flex-grow: 1; /* 남은 수직 공간을 모두 차지하도록 설정 */
+    overflow-x: auto; /* 테이블이 넓어질 경우 이 컨테이너에만 가로 스크롤이 생깁니다. */
+    overflow-y: auto; /* 테이블 내용이 많아질 경우 세로 스크롤 추가 */
+}
+
+.loading, .error, .noData {
+    text-align: center;
+    padding: 40px;
+    font-size: 18px;
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .paginationWrapper {
+        flex-direction: column; /* 모바일에서 세로로 쌓기 */
+        gap: 15px; /* 요소 사이 간격 추가 */
+    }
+
+    /* --- 모바일 테이블 카드 뷰 스타일 --- */
+    .userDataTable {
+        border: none;
+    }
+
+    .userDataTable thead {
+        display: none; /* 모바일에서는 헤더 숨김 */
+    }
+
+    .userDataTable tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .userDataTable td {
+        display: flex; /* Flexbox 레이아웃으로 변경 */
+        justify-content: space-between; /* 라벨과 값을 양쪽 끝으로 분리 */
+        align-items: flex-start; /* 내용이 길어질 경우 상단 정렬 */
+        border: none;
+        border-bottom: 1px solid #e9ecef;
+        white-space: normal; /* 줄바꿈 허용 */
+        padding: 12px 15px; /* 좌우 패딩을 추가하여 여백을 만듭니다. */
+    }
+
+    .userDataTable td::before {
+        content: attr(data-label); /* data-label 속성값을 라벨로 사용 */
+        /* float: left; 대신 Flexbox가 간격을 관리합니다. */
+        font-weight: 600;
+        color: #343a40;
+        padding-right: 10px; /* 라벨과 값 사이의 간격 */
+        flex-shrink: 0; /* 라벨 너비가 줄어들지 않도록 함 */
+    }
+}
+
+/* --- Pagination Styles --- */
+
+.paginationContainer {
+    display: flex;
+    justify-content: center;
+}
+
+.pagination {
+    display: flex;
+    padding-left: 0;
+    list-style: none;
+    border-radius: 0.25rem;
+}
+
+.pageItem {
+    margin: 0 2px;
+}
+
+.pageLink {
+    position: relative;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    margin-left: -1px;
+    line-height: 1.25;
+    color: #007bff;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.pageLink:hover {
+    z-index: 2;
+    color: #0056b3;
+    text-decoration: none;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.pageItem.active .pageLink {
+    z-index: 1;
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.pageItem.disabled .pageLink {
+    color: #6c757d;
+    pointer-events: none;
+    cursor: auto;
+    background-color: #fff;
+    border-color: #dee2e6;
+}
+
+.pageItem:first-child .pageLink {
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.pageItem:last-child .pageLink {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+}

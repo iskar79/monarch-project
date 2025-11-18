@@ -1,0 +1,468 @@
+:root {
+    --primary-color: #007bff;
+    --primary-color-dark: #0056b3;
+    --sidebar-width-collapsed: 60px;
+    --sidebar-width-expanded: 240px;
+    --sidebar-bg-color: #343a40; /* 기존 #2c3e50 에서 한 톤 밝게 변경 */
+    --sidebar-text-color: #ecf0f1;
+    --sidebar-header-bg-color: #212529; /* 헤더 영역을 구분하기 위해 더 어둡게 조정 */
+    --topbar-height: 60px;
+    --overlay-bg-color: rgba(0, 0, 0, 0.5);
+}
+
+.pageContainer {
+    display: flex;
+    min-height: 100vh;
+    background-color: #e9ecef; /* 위젯과 명확히 구분되도록 배경색을 변경합니다. */
+}
+
+/* --- 상단 바 --- */
+
+.topBar {
+    height: var(--topbar-height);
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    padding: 0 30px; /* 상하 0, 좌우 30px 패딩 */
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width-collapsed); /* 기본 사이드바 너비만큼 왼쪽에서 시작 */
+    right: 0;
+    z-index: 1000; /* 사이드바 바로 아래에 위치 */
+    transition: left 0.3s ease; /* 사이드바 너비 변경 시 부드럽게 이동 */
+}
+
+.headerContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.sidebar.pinned ~ .mainContent .topBar {
+    left: var(--sidebar-width-expanded); /* 사이드바가 펼쳐졌을 때 topBar의 시작 위치 */
+}
+
+/* --- 상단 메뉴 --- */
+.topMenu {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.topMenuItem {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.topMenuLink {
+    cursor: pointer;
+    text-decoration: none;
+    color: #495057;
+    font-weight: 500;
+    padding: 0 20px; /* 상하 0, 좌우 20px 패딩 */
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.topMenuItem:hover > .topMenuLink {
+    background-color: #e9ecef;
+    color: var(--primary-color-dark);
+}
+
+.topSubmenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #ffffff;
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 160px;
+    z-index: 1100;
+}
+
+.topMenuItem:hover .topSubmenu {
+    display: block;
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.welcomeMessage {
+    font-size: 16px;
+    color: #212529;
+}
+
+.honorific {
+    font-size: 16px;
+    font-weight: 400;
+    color: #6c757d;
+}
+
+.logoutButton {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.logoutButton:hover {
+    background-color: var(--primary-color-dark);
+}
+
+.mainWrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding-top: 60px; /* 상단 메뉴바 높이(60px) 만큼만 패딩을 줍니다. */
+    overflow-y: auto; /* mainWrapper가 넘칠 경우 세로 스크롤 */
+}
+
+/* --- 사이드바 --- */
+
+.sidebar {
+    width: var(--sidebar-width-collapsed);
+    background-color: var(--sidebar-bg-color);
+    color: var(--sidebar-text-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar:hover,
+.sidebar.pinned {
+    width: var(--sidebar-width-expanded);
+}
+
+.sidebarHeader {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--sidebar-header-bg-color);
+    border-bottom: 1px solid #495057; /* 헤더와 메뉴를 구분하는 하단 테두리 추가 */
+    padding-bottom: 20px; /* 헤더 하단에 20px의 패딩을 추가하여 간격을 만듭니다. */
+}
+
+.monarchIcon {
+    font-size: 24px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    opacity: 1;
+}
+
+.logoText {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--sidebar-text-color);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar:hover .monarchIcon,
+.sidebar.pinned .monarchIcon {
+    transform: scale(0); /* Hide by scaling down */
+}
+
+.sidebar:hover .logoText,
+.sidebar.pinned .logoText {
+    opacity: 1;
+}
+
+/* --- 사이드바 고정 토글 스위치 --- */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px; /* 너비 축소 */
+  height: 24px; /* 높이 축소 */
+  flex-shrink: 0; /* 사이드바가 좁아져도 스위치 크기 유지 */
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #738694;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* --- 사이드바 메뉴 --- */
+
+.menuList {
+    list-style: none;
+    padding: 0;
+    margin: 0; /* 상하좌우 마진 없음 */
+}
+.menuItem {
+    position: relative;
+}
+
+.menuLink {
+    position: relative; /* ::before 유사 요소를 위한 기준점 설정 */
+    padding: 15px 20px; /* 상하 15px, 좌우 20px 패딩 */
+    color: var(--sidebar-text-color); /* 가독성을 위해 더 밝은 색상으로 변경 */
+    text-decoration: none;
+    white-space: nowrap;
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Vertically center icon and text */
+    transition: background-color 0.2s, color 0.2s;
+    overflow: hidden; /* 텍스트가 넘칠 경우 숨김 */
+}
+
+.menuIcon {
+    font-size: 20px;
+    min-width: 20px; /* 아이콘이 차지할 최소 너비 */
+    text-align: center;
+}
+
+.menuText {
+    margin-left: 15px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* 서브메뉴 펼침/닫힘 화살표 아이콘 */
+.arrowIcon {
+    margin-left: auto;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--sidebar-text-color); /* 아이콘 색상도 텍스트와 통일 */
+    transition: transform 0.3s ease;
+    opacity: 0; /* 평소에는 숨김 */
+}
+
+
+.menuLink::before {
+    content: ''; /* 실제 내용은 없앰 */
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px; /* 커버 역할을 할 세로 바의 너비 */
+    background-color: #4a6a8a; /* 평상시 커버 색상 */
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.menuItem:hover > .menuLink {
+    background-color: #495057; /* 마우스 오버 색상도 배경에 맞춰 조정 */
+    color: #ffffff; /* 마우스 오버 시 흰색으로 강조 */
+}
+
+.menuItem:hover > .menuLink::before,
+.sidebar.pinned .menuItem:hover > .menuLink::before {
+    width: 8px; /* 마우스 오버 시 커버 너비 확장 */
+    background-color: var(--primary-color); /* 마우스 오버 시 커버 색상 변경 */
+}
+
+.sidebar:hover .menuText,
+.sidebar.pinned .menuText {
+    opacity: 1;
+}
+
+/* 사이드바 확장 시 화살표 아이콘 표시 */
+.sidebar:hover .arrowIcon,
+.sidebar.pinned .arrowIcon {
+    opacity: 1;
+}
+
+.submenu {
+    list-style: none;
+    padding-left: 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    background-color: var(--sidebar-bg-color);
+}
+
+/* PC에서는 hover, 모바일에서는 .open 클래스로 서브메뉴 제어 */
+.menuItem:hover .submenu,
+.menuItem.open .submenu {
+    max-height: 200px; /* 서브메뉴 항목 수에 따라 조절 */
+}
+
+.menuItem.open .arrowIcon {
+    transform: rotate(180deg); /* 메뉴 열렸을 때 화살표 회전 */
+}
+
+.submenu li a {
+    display: block;
+    padding: 10px 20px; /* 상하 10px, 좌우 20px 패딩 */
+    color: var(--sidebar-text-color); /* 가독성을 위해 더 밝은 색상으로 변경 */
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.submenu li a:hover {
+    background-color: #46627f;
+    color: #ffffff;
+}
+
+.topSubmenu li a {
+    display: block;
+    padding: 10px 20px; /* 상하 10px, 좌우 20px 패딩 */
+    color: #495057;
+    text-decoration: none;
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.topSubmenu li a:hover {
+    background-color: #f1f3f5;
+    color: #212529;
+}
+
+/* --- 메인 콘텐츠 영역 --- */
+
+.mainContent {
+    margin-left: var(--sidebar-width-collapsed);
+    flex-grow: 1;
+    transition: margin-left 0.3s ease;
+    display: flex; /* 자식 요소(mainWrapper)를 flex 아이템으로 만들기 위해 추가 */
+    width: calc(100vw - var(--sidebar-width-collapsed)); /* 뷰포트 너비에서 사이드바 너비를 뺀 값 */
+}
+
+.mainContent.shifted {
+    margin-left: var(--sidebar-width-expanded);
+    width: calc(100vw - var(--sidebar-width-expanded)); /* 사이드바 확장 시 너비 조정 */
+}
+
+/* --- 반응형 스타일 (모바일) --- */
+.hamburgerButton {
+    display: none; /* 평소에는 숨김 */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0; /* 상하좌우 패딩 없음 */
+    margin-right: 15px;
+    z-index: 1002;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--overlay-bg-color);
+    z-index: 1000;
+}
+
+@media (max-width: 768px) {
+    .topBar {
+        left: 0; /* 모바일에서 상단 바의 왼쪽 여백 제거 */
+        padding: 0 15px; /* 상하 0, 좌우 15px 패딩 */
+    }
+
+    .hamburgerButton {
+        display: block; /* 모바일에서만 보임 */
+    }
+
+    .topMenu {
+        display: none; /* 모바일에서는 상단 메뉴 숨김 */
+    }
+
+    .sidebar {
+        transform: translateX(-100%); /* 사이드바를 왼쪽으로 숨김 */
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.mobileOpen {
+        transform: translateX(0); /* mobileOpen 클래스가 있으면 사이드바 보임 */
+        width: 260px; /* 모바일 사이드바 너비 고정 */
+        overflow-y: auto; /* 메뉴가 많을 경우 스크롤 */
+    }
+    
+    /* 모바일 사이드바가 열렸을 때 메뉴 텍스트가 항상 보이도록 설정 */
+    .sidebar.mobileOpen .menuText {
+        opacity: 1;
+        margin-left: 15px;
+    }
+    
+    /* 모바일 사이드바가 열렸을 때 화살표 아이콘 항상 표시 */
+    .sidebar.mobileOpen .arrowIcon {
+        opacity: 1;
+    }
+
+
+    .mainContent {
+        margin-left: 0; /* 메인 콘텐츠 여백 제거 */
+        width: 100vw;
+    }
+
+    .mainContent.shifted {
+        margin-left: 0; /* 핀 고정 기능으로 인한 여백 이동 비활성화 */
+        width: 100vw;
+    }
+
+    .sidebar.mobileOpen ~ .mainContent .overlay {
+        display: block; /* 모바일 사이드바가 열렸을 때만 오버레이 표시 */
+    }
+}

@@ -1,0 +1,155 @@
+import React, { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import { useAuth } from "../../hooks/useAuth";
+import styles from "../../styles/ListPage.module.css";
+import Pagination from "../Pagination";
+import Widget from "../Widget";
+
+interface SalesDataRow {
+    [key: string]: string | number | boolean | null | undefined;
+}
+
+const SalesWidget: React.FC = () => {
+    const { uid, usite } = useAuth();
+    const [salesData, setSalesData] = useState<SalesDataRow[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+
+    const [searchColumn, setSearchColumn] = useState('');
+    const [searchKeyword, setSearchKeyword] = useState('');
+    const [appliedFilters, setAppliedFilters] = useState<{ [key: string]: string }>({});
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(max-width: 768px)");
+        const handleResize = (e: MediaQueryListEvent | MediaQueryList) => {
+            setPageSize(e.matches ? 5 : 10);
+            setCurrentPage(1);
+        };
+        mediaQuery.addEventListener('change', handleResize);
+        handleResize(mediaQuery);
+        return () => mediaQuery.removeEventListener('change', handleResize);
+    }, []);
+
+    const fetchSalesData = useCallback(async (page: number) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await axios.get('/api/data/execute', {
+                params: {
+                    serviceName: 'M_SALES',
+                    methodName: 'MLIST',
+                    USITE: usite,
+                    UID: uid,
+                    _page: page,
+                    _sort: 'SALESID DESC',
+                    _size: pageSize,
+                    ...appliedFilters,
+                }
+            });
+            const responseData = Array.isArray(response.data) ? response.data[0] : response.data;
+            setSalesData(responseData?.data || []);
+            setTotalCount(responseData?.totalCount || 0);
+        } catch (err) {
+            setError('매출 정보를 불러오는 데 실패했습니다.');
+            console.error('Sales data fetch error:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [appliedFilters, pageSize, uid, usite]);
+
+    const handleSearch = () => {
+        if (searchKeyword && !searchColumn) {
+            alert('검색 항목을 선택해주세요.');
+            return;
+        }
+        setCurrentPage(1);
+        const newFilters: { [key: string]: string } = {};
+        if (searchKeyword.trim() !== '' && searchColumn) {
+            newFilters[searchColumn] = searchKeyword;
+        }
+        setAppliedFilters(newFilters);
+    };
+
+    useEffect(() => {
+        fetchSalesData(currentPage);
+    }, [fetchSalesData, currentPage]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    if (isLoading) return <Widget title="매출 정보"><div className={styles.loading}>데이터를 불러오는 중입니다...</div></Widget>;
+    if (error) return <Widget title="매출 정보"><div className={styles.error}>{error}</div></Widget>;
+
+    return (
+        <Widget title="매출 정보">
+            <div className={styles.filterContainer}>
+                <div className={styles.filterRow}>
+                    <select className={styles.filterSelect} value={searchColumn} onChange={e => setSearchColumn(e.target.value)} required>
+                        <option value="" disabled>검색 항목</option>
+                        <option value="SALENAME">영업기회명</option>
+                        <option value="CLINAME">고객사명</option>
+                        <option value="OWNER_NM">담당자</option>
+                    </select>
+                    <input
+                        type="text"
+                        className={styles.filterInput}
+                        value={searchKeyword}
+                        onChange={e => setSearchKeyword(e.target.value)}
+                        onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                        placeholder="검색어를 입력하세요..."
+                    />
+                    <button className={styles.searchButton} onClick={handleSearch}>
+                        조회
+                    </button>
+                </div>
+            </div>
+
+            {salesData.length > 0 ? (
+                <>
+                    <div className={styles.tableContainer}>
+                        <table className={styles.userDataTable}>
+                            <thead>
+                                <tr>
+                                    <th>영업기회명</th>
+                                    <th>고객사명</th>
+                                    <th>담당자</th>
+                                    <th>예상수주금액</th>
+                                    <th>진행상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {salesData.map((row, index) => (
+                                    <tr key={index}>
+                                        <td data-label="영업기회명">{row.SALENAME}</td>
+                                        <td data-label="고객사명">{row.CLINAME}</td>
+                                        <td data-label="담당자">{row.OWNER_NM}</td>
+                                        <td data-label="예상수주금액">{Number(row.FORDAMOUNT).toLocaleString()}</td>
+                                        <td data-label="진행상태">{row.SALESSTATE_NM}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className={styles.paginationWrapper}>
+                        <span className={styles.totalCount}>총 {totalCount}건</span>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalCount={totalCount}
+                            pageSize={pageSize}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                </>
+            ) : (
+                <div className={styles.noData}>표시할 매출 정보가 없습니다.</div>
+            )}
+        </Widget>
+    );
+};
+
+export default SalesWidget;

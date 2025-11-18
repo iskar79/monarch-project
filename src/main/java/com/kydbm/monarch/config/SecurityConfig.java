@@ -61,8 +61,7 @@ public class SecurityConfig {
         TemporaryAuthenticationProvider temporaryProvider = new TemporaryAuthenticationProvider(userDetailsService);
         
         // 2. 다른 모든 사용자를 위한 표준 인증 공급자
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(userDetailsService);
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
         
         // ProviderManager는 등록된 순서대로 인증을 시도합니다.
