@@ -1,17 +1,38 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import LoginPage from './pages/LoginPage.tsx';
-import './App.css';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import LoginPage from './pages/LoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import DashboardPage from './pages/DashboardPage';
+import CustomerPage from './pages/CustomerPage';
+import SalesPage from './pages/SalesPage';
+import ContactPage from './pages/ContactPage';
+import UserPage from './pages/UserPage';
 
-function App() {
+// MainPage는 이제 DashboardPage가 그 역할을 대신하므로 제거될 수 있습니다.
+// 만약 MainPage를 계속 사용하고 싶다면 DashboardPage 대신 MainPage를 사용하세요.
+
+const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* 다른 모든 복잡한 라우팅을 제거하고, 오직 로그인 페이지만 표시합니다. */}
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/login" element={<LoginPage />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+
+      {/* ProtectedRoute는 로그인 페이지를 제외한 모든 페이지를 보호합니다. */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/customers" element={<CustomerPage />} />
+          <Route path="/sales" element={<SalesPage />} />
+          <Route path="/contacts" element={<ContactPage />} />
+          <Route path="/users" element={<UserPage />} />
+        </Route>
+      </Route>
+
+      {/* 정의되지 않은 경로로 접근 시 기본 페이지로 리디렉션 */}
+      {/* 이 부분은 ProtectedRoute 내부에서 처리되므로 제거하거나 주석 처리할 수 있습니다. */}
+      {/* <Route path="*" element={<Navigate to="/" />} /> */}
+    </Routes>
   );
-}
+};
 
 export default App;

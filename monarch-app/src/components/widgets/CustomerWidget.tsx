@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { useAuth } from "../../hooks/useAuth";
 import styles from "../../styles/ListPage.module.css";
 import Pagination from "../Pagination";
 import Widget from "../Widget";
@@ -10,7 +9,6 @@ interface CustomerDataRow {
 }
 
 const CustomerWidget: React.FC = () => {
-    const { uid, usite } = useAuth();
     const [customerData, setCustomerData] = useState<CustomerDataRow[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -38,6 +36,10 @@ const CustomerWidget: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
+            const storedUser = sessionStorage.getItem('user');
+            const user = storedUser ? JSON.parse(storedUser) : {};
+            const usite = user?.M_USITE_NO || 1;
+            const uid = user?.M_USER_NO || null;
             const response = await axios.get('/api/data/execute', {
                 params: {
                     serviceName: 'M_CUST',
@@ -59,7 +61,7 @@ const CustomerWidget: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [appliedFilters, pageSize, uid, usite]);
+    }, [appliedFilters, pageSize]);
 
     const handleSearch = () => {
         if (searchKeyword && !searchColumn) {

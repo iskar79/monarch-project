@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { useAuth } from "../../hooks/useAuth";
 import styles from "../../styles/ListPage.module.css";
 import Pagination from "../Pagination";
 import Widget from "../Widget";
@@ -10,7 +9,6 @@ interface SalesDataRow {
 }
 
 const SalesWidget: React.FC = () => {
-    const { uid, usite } = useAuth();
     const [salesData, setSalesData] = useState<SalesDataRow[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -38,6 +36,10 @@ const SalesWidget: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
+            const storedUser = sessionStorage.getItem('user');
+            const user = storedUser ? JSON.parse(storedUser) : {};
+            const usite = user?.M_USITE_NO || 1;
+            const uid = user?.M_USER_NO || null;
             const response = await axios.get('/api/data/execute', {
                 params: {
                     serviceName: 'M_SALES',
@@ -54,12 +56,12 @@ const SalesWidget: React.FC = () => {
             setSalesData(responseData?.data || []);
             setTotalCount(responseData?.totalCount || 0);
         } catch (err) {
-            setError('매출 정보를 불러오는 데 실패했습니다.');
+            setError('영업 정보를 불러오는 데 실패했습니다.');
             console.error('Sales data fetch error:', err);
         } finally {
             setIsLoading(false);
         }
-    }, [appliedFilters, pageSize, uid, usite]);
+    }, [appliedFilters, pageSize]);
 
     const handleSearch = () => {
         if (searchKeyword && !searchColumn) {
@@ -82,11 +84,11 @@ const SalesWidget: React.FC = () => {
         setCurrentPage(page);
     };
 
-    if (isLoading) return <Widget title="매출 정보"><div className={styles.loading}>데이터를 불러오는 중입니다...</div></Widget>;
-    if (error) return <Widget title="매출 정보"><div className={styles.error}>{error}</div></Widget>;
+    if (isLoading) return <Widget title="영업 정보"><div className={styles.loading}>데이터를 불러오는 중입니다...</div></Widget>;
+    if (error) return <Widget title="영업 정보"><div className={styles.error}>{error}</div></Widget>;
 
     return (
-        <Widget title="매출 정보">
+        <Widget title="영업 정보">
             <div className={styles.filterContainer}>
                 <div className={styles.filterRow}>
                     <select className={styles.filterSelect} value={searchColumn} onChange={e => setSearchColumn(e.target.value)} required>

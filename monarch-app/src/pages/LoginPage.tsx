@@ -8,32 +8,31 @@ const LoginPage: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-
+    
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
-        // Spring Security의 formLogin은 FormData 형식을 사용합니다.
-        const formData = new FormData();
+        // Spring Security의 formLogin은 application/x-www-form-urlencoded 형식을 사용합니다.
+        // URLSearchParams를 사용하면 더 간결하게 표현할 수 있습니다.
+        const formData = new URLSearchParams();
         formData.append('username', username);
         formData.append('password', password);
 
         try {
             await axios.post('/api/login', formData);
 
-            // 로그인 성공 후, 이제 모든 상세 정보를 포함한 사용자 정보를 가져옵니다.
+            // 로그인 성공 후, 변경된 API(/api/user/info)로 사용자 정보를 가져옵니다.
             const response = await axios.get('/api/user/info');
             const user = response.data;
-
-            // sessionStorage에 전체 사용자 정보를 저장합니다.
-            sessionStorage.removeItem('loginError');
+            
+            // sessionStorage에 직접 사용자 정보를 저장합니다.
             sessionStorage.setItem('user', JSON.stringify(user));
 
             navigate('/'); // 메인 페이지로 이동합니다.
         } catch (err) {
             setError('Login failed. Please check your username and password.');
             console.error('Login error:', err);
-            sessionStorage.setItem('loginError', 'Login failed. Please check your username and password.');
         }
     };
 

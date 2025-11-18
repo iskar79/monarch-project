@@ -1,33 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
-import axios from 'axios';
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
 
-interface ProtectedRouteProps {
-    children: React.ReactElement;
-}
+const ProtectedRoute: React.FC = () => {
+    // sessionStorage에서 사용자 정보를 직접 확인합니다.
+    const storedUser = sessionStorage.getItem('user');
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                // 백엔드에 인증 상태 확인 요청
-                await axios.get('/api/auth/status');
-                setIsAuthenticated(true);
-            } catch (error) {
-                setIsAuthenticated(false);
-            }
-        };
-        checkAuth();
-    }, []);
-
-    if (isAuthenticated === null) {
-        // 인증 상태 확인 중... 로딩 스피너 등을 보여줄 수 있습니다.
-        return <div>Loading...</div>;
-    }
-
-    return isAuthenticated ? children : <Navigate to="/login" />;
+    // 사용자 정보가 있으면 자식 컴포넌트(Outlet)를 렌더링하고,
+    // 없으면 로그인 페이지로 리디렉션합니다.
+    return storedUser ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useAuth } from "../../hooks/useAuth";
 import { Chart } from "react-google-charts";
 import Widget from "../Widget";
 
@@ -11,7 +10,6 @@ interface CustomerStatus {
 }
 
 const CustomerStatusWidget: React.FC = () => {
-    const { uid, usite } = useAuth();
     const [customerStatusData, setCustomerStatusData] = useState<CustomerStatus[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -21,6 +19,10 @@ const CustomerStatusWidget: React.FC = () => {
             setIsLoading(true);
             setError(null);
             try {
+                const storedUser = sessionStorage.getItem('user');
+                const user = storedUser ? JSON.parse(storedUser) : {};
+                const usite = user?.M_USITE_NO || 1;
+                const uid = user?.M_USER_NO || null;
                 const response = await axios.get('/api/data/execute', {
                     params: {
                         serviceName: 'MS_CUST_INFO',
@@ -39,7 +41,7 @@ const CustomerStatusWidget: React.FC = () => {
         };
 
         fetchCustomerStatusData();
-    }, [uid, usite]);
+    }, []);
 
     const chartData = [
         ["Task", "고객 현황"],

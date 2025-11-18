@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 import styles from './Layout.module.css';
-// useAuth 훅과 상수를 가져옵니다. (실제 프로젝트에서는 경로에 맞게 수정)
-import { useAuth, USER_FIELDS } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+
+interface UserData {
+    USER_NAME: string;
+    [key: string]: string | number | boolean | null | undefined;
+}
 
 // 메뉴 구조 정의
 const menuItems = [
@@ -17,12 +22,18 @@ const menuItems = [
 ];
 
 const Layout: React.FC = () => {
-    // useAuth 훅을 사용하여 인증 관련 상태와 함수를 가져옵니다.
-    const { user, isAuthenticated, handleLogout } = useAuth();
     const [isSidebarPinned, setSidebarPinned] = useState(false);
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [openMenu, setOpenMenu] = useState<string | null>(null); // 아코디언 메뉴 상태
     const location = useLocation(); // 페이지 이동 감지를 위해 사용
+    const navigate = useNavigate();
+
+    // sessionStorage에서 사용자 정보를 읽어옵니다.
+    // useMemo를 사용하여 불필요한 재파싱을 방지합니다.
+    const user: UserData | null = useMemo(() => {
+        const storedUser = sessionStorage.getItem('user');
+        return storedUser ? JSON.parse(storedUser) : null;
+    }, []); // 이 컴포넌트가 마운트될 때 한 번만 확인
 
     const sidebarClasses = `${styles.sidebar} ${isSidebarPinned ? styles.pinned : ''}`;
     const mainContentClasses = `${styles.mainContent} ${isSidebarPinned ? styles.shifted : ''}`;
@@ -42,10 +53,11 @@ const Layout: React.FC = () => {
     // 페이지 경로가 변경되면 모바일 메뉴와 아코디언 메뉴를 닫습니다.
     useEffect(() => { setMobileMenuOpen(false); setOpenMenu(null); }, [location.pathname]);
 
-    // 인증 상태가 확인되기 전에는 로딩 상태를 표시할 수 있습니다.
-    if (isAuthenticated === null) {
-        return <div>Loading...</div>; // 혹은 스피너 컴포넌트
-    }
+    const handleLogout = async () => {
+        await axios.post('/api/logout').catch((err) => console.error("Logout failed", err));
+        sessionStorage.removeItem('user');
+        navigate('/login');
+    };
 
     return (
         <div className={styles.pageContainer}>
@@ -117,7 +129,7 @@ const Layout: React.FC = () => {
                             ))}
                         </nav>
                         <div className={styles.userInfo}>
-                            <span className={styles.welcomeMessage}>반갑습니다, {user?.[USER_FIELDS.NAME] || '사용자'} <span className={styles.honorific}>님</span></span>
+                            <span className={styles.welcomeMessage}>반갑습니다, {user?.USER_NAME || '사용자'} <span className={styles.honorific}>님</span></span>
                             <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
                         </div>
                     </div>
