@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Chart } from "react-google-charts";
+import styles from "../../styles/ListPage.module.css"; // styles import 추가
 import Widget from "../Widget";
 
-interface CustomerStatus {
-    activeCustomers: number;
-    potentialCustomers: number;
-    churnedCustomers: number;
+interface CustomerStatusItem {
+    CSTGRADE_NM: string;
+    CSTGRADE_CNT: number;
 }
 
+type CustomerStatusData = (string | number)[];
+
 const CustomerStatusWidget: React.FC = () => {
-    const [customerStatusData, setCustomerStatusData] = useState<CustomerStatus[]>([]);
+    const [chartData, setChartData] = useState<CustomerStatusData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +33,18 @@ const CustomerStatusWidget: React.FC = () => {
                         UID: uid,
                     }
                 });
-                setCustomerStatusData(response.data);
+
+                // API 응답 데이터를 Google Charts 형식에 맞게 변환합니다.
+                const formattedData: CustomerStatusData[] = [["고객 등급", "고객 수"]];
+                // EXEC_TYPE이 'LIST'이므로, 응답은 { data: [...], totalCount: N } 형태의 객체를 포함한 배열입니다.
+                const result = response.data[0]; 
+                const actualData = result?.data || [];
+
+                actualData.forEach((item: CustomerStatusItem) => {
+                    formattedData.push([item.CSTGRADE_NM, Number(item.CSTGRADE_CNT)]);
+                });
+
+                setChartData(formattedData);
             } catch (err) {
                 setError('고객 상태 정보를 불러오는 데 실패했습니다.');
                 console.error('Customer status data fetch error:', err);
@@ -43,34 +56,45 @@ const CustomerStatusWidget: React.FC = () => {
         fetchCustomerStatusData();
     }, []);
 
-    const chartData = [
-        ["Task", "고객 현황"],
-        ["활성 고객", customerStatusData[0]?.activeCustomers || 0],
-        ["잠재 고객", customerStatusData[0]?.potentialCustomers || 0],
-        ["이탈 고객", customerStatusData[0]?.churnedCustomers || 0],
-    ];
-
     const chartOptions = {
         title: '고객 현황',
         is3D: true,
     };
 
-    if (isLoading) return <Widget title="고객 현황"><div className="loading">데이터를 불러오는 중입니다...</div></Widget>;
-    if (error) return <Widget title="고객 현황"><div className="error">{error}</div></Widget>;
+    if (isLoading) return <Widget title="고객 현황"><div className={styles.loading}>데이터를 불러오는 중입니다...</div></Widget>;
+    if (error) return <Widget title="고객 현황"><div className={styles.error}>{error}</div></Widget>;
 
     return (
         <Widget title="고객 현황">
-            {customerStatusData.length > 0 ? (
-                <Chart
-                    chartType="PieChart"
-                    data={chartData}
-                    options={chartOptions}
-                    width={"100%"}
-                    height={"300px"}
-                />
-            ) : (
-                <div>표시할 고객 현황 데이터가 없습니다.</div>
-            )}
+            {chartData.length > 1 ? (
+                <>
+                    <Chart
+                        chartType="PieChart"
+                        data={chartData}
+                        options={chartOptions}
+                        width={"100%"}
+                        height={"250px"} // 테이블 공간을 위해 차트 높이 조정
+                    />
+                    <div className={styles.tableContainer} style={{ marginTop: '20px', maxHeight: '200px' }}>
+                        <table className={styles.userDataTable}>
+                            <thead>
+                                <tr>
+                                    <th className={styles.textCenter}>고객 등급</th>
+                                    <th className={styles.textCenter}>고객 수</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chartData.slice(1).map((row, index) => ( // 헤더를 제외하고 데이터만 렌더링
+                                    <tr key={index}>
+                                        <td className={styles.textCenter}>{String(row[0])}</td>
+                                        <td className={styles.textRight}>{Number(row[1]).toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            ) : (<div className={styles.noData}>표시할 고객 현황 데이터가 없습니다.</div>)}
         </Widget>
     );
 };
