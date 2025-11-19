@@ -8,6 +8,7 @@ import CustomerPage from './pages/CustomerPage';
 import SalesPage from './pages/SalesPage';
 import ContactPage from './pages/ContactPage';
 import UserPage from './pages/UserPage';
+import StructureAdminPage from './pages/StructureAdminPage';
 
 // MainPage는 이제 DashboardPage가 그 역할을 대신하므로 제거될 수 있습니다.
 // 만약 MainPage를 계속 사용하고 싶다면 DashboardPage 대신 MainPage를 사용하세요.
@@ -25,7 +26,7 @@ const App: React.FC = () => {
           <Route path="/sales" element={<SalesPage />} /> {/* 영업관리 */}
           <Route path="/sales/contact" element={<ContactPage />} /> {/* 접촉관리 */}
           <Route path="/admin/users" element={<UserPage />} /> {/* 사용자관리 */}
-          <Route path="/admin/dev" element={<>개발정보</>} /> {/* 개발정보 */}
+          <Route path="/admin/dev" element={<StructureAdminPage />} /> {/* 개발정보 */}
         </Route>
       </Route>
 

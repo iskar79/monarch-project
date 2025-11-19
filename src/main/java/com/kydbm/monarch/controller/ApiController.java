@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.kydbm.monarch.domain.CustomUserDetails;
+import com.kydbm.monarch.service.DynamicGridStructure;
 import com.kydbm.monarch.service.DynamicQueryService;
 
 import java.util.Map;
@@ -28,11 +29,13 @@ public class ApiController {
     }
 
     private final DynamicQueryService dynamicQueryService;
+    private final DynamicGridStructure dynamicGridStructure;
     private final UserMapper userMapper;
 
-    public ApiController(DynamicQueryService dynamicQueryService, UserMapper userMapper) {
+    public ApiController(DynamicQueryService dynamicQueryService, DynamicGridStructure dynamicGridStructure, UserMapper userMapper) {
         this.dynamicQueryService = dynamicQueryService;
         this.userMapper = userMapper;
+        this.dynamicGridStructure = dynamicGridStructure;
     }
 
     @GetMapping("/auth/status")
@@ -63,20 +66,27 @@ public class ApiController {
     }
 
     @GetMapping("/data/execute")
-    public List<Map<String, Object>> executeServiceQuery(
-            @RequestParam("serviceName") String serviceName,
-            @RequestParam("methodName") String methodName,
-            @RequestParam Map<String, String> allRequestParams) {
+    public ResponseEntity<?> executeServiceQuery(@RequestParam Map<String, String> allRequestParams) {
+        String serviceName = allRequestParams.get("serviceName");
+        String methodName = allRequestParams.get("methodName");
+        Long mUsiteNo = Long.parseLong(allRequestParams.getOrDefault("usiteNo", "1"));
 
-        Long mUsiteNo = Long.parseLong(allRequestParams.getOrDefault("mUsiteNo", "1"));
-        allRequestParams.remove("serviceName");
-        allRequestParams.remove("methodName");
+        if ("M_STRUCTURE".equals(serviceName)) {
+            String structureName = allRequestParams.get("structureName");
 
-        Map<String, Object> queryParams = new HashMap<>(allRequestParams);
-        // 동적 쿼리에서 @USITE@ 파라미터를 사용할 수 있도록 값을 추가합니다.
-        queryParams.put("USITE", mUsiteNo);
+            String structureCont = dynamicGridStructure.getStructureByName(structureName, mUsiteNo);
+            return ResponseEntity.ok(Map.of("structureCont", structureCont));
 
-        return dynamicQueryService.executeDynamicQuery(serviceName, methodName, mUsiteNo, queryParams);
+
+        } else {
+            Map<String, Object> queryParams = new HashMap<>(allRequestParams);
+            queryParams.remove("serviceName");
+            queryParams.remove("methodName");
+            queryParams.put("USITE", mUsiteNo);
+
+            List<Map<String, Object>> result = dynamicQueryService.executeDynamicQuery(serviceName, methodName, mUsiteNo, queryParams);
+            return ResponseEntity.ok(result);
+        }
     }
 
     @GetMapping("/user/details")

@@ -16,9 +16,12 @@ const menuItems = [
     { name: '영업', icon: '💼', subItems: [
         { name: '영업관리', path: '/sales' },
         { name: '접촉관리', path: '/sales/contact' } // "접촉관리" 메뉴로 수정
-    ] },
+    ]},
     { name: '고객', icon: '👥', subItems: [{ name: '고객관리', path: '/customer' }] },
-    { name: 'Admin', icon: '⚙️', subItems: [{ name: '사용자관리', path: '/admin/users' }, { name: '개발정보', path: '/admin/dev' }] },
+    { name: 'Admin', icon: '⚙️', subItems: [
+        { name: '사용자관리', path: '/admin/users' },
+        { name: '개발정보', path: '/admin/dev' }
+    ] },
 ];
 
 const Layout: React.FC = () => {
@@ -29,13 +32,13 @@ const Layout: React.FC = () => {
     const navigate = useNavigate();
 
     // sessionStorage에서 사용자 정보를 읽어옵니다.
-    // useMemo를 사용하여 불필요한 재파싱을 방지합니다.
     const user: UserData | null = useMemo(() => {
         const storedUser = sessionStorage.getItem('user');
         return storedUser ? JSON.parse(storedUser) : null;
-    }, []); // 이 컴포넌트가 마운트될 때 한 번만 확인
+    }, []);
 
     const sidebarClasses = `${styles.sidebar} ${isSidebarPinned ? styles.pinned : ''}`;
+
     const mainContentClasses = `${styles.mainContent} ${isSidebarPinned ? styles.shifted : ''}`;
     const mobileSidebarClasses = `${sidebarClasses} ${isMobileMenuOpen ? styles.mobileOpen : ''}`;
 
@@ -58,6 +61,36 @@ const Layout: React.FC = () => {
         sessionStorage.removeItem('user');
         navigate('/login');
     };
+
+    // // 재귀적으로 메뉴를 렌더링하는 함수
+    // const renderMenuItems = (items: MenuItem[], isSubmenu = false) => {
+    //     return items.map((item) => {
+    //         const hasSubItems = !!(item.subItems && item.subItems.length > 0);
+    //         const isMenuOpen = openMenu === item.name;
+
+    //         // 서브메뉴가 있는 경우, 첫 번째 서브메뉴의 경로를 기본 경로로 사용
+    //         const linkPath = item.path || (hasSubItems ? '#' : '#');
+
+    //         return (
+    //             <li key={item.name} className={`${styles.menuItem} ${isMenuOpen ? styles.open : ''} ${isSubmenu ? styles.subMenuItem : ''}`}>
+    //                 <Link
+    //                     to={linkPath}
+    //                     className={styles.menuLink}
+    //                     onClick={(e) => handleMenuClick(e, item.name, hasSubItems)}
+    //                 >
+    //                     {item.icon && <span className={styles.menuIcon}>{item.icon}</span>}
+    //                     <span className={styles.menuText}>{item.name}</span>
+    //                     {hasSubItems && <span className={styles.arrowIcon}></span>}
+    //                 </Link>
+    //                 {hasSubItems && (
+    //                     <ul className={styles.submenu}>
+    //                         {renderMenuItems(item.subItems!, true)}
+    //                     </ul>
+    //                 )}
+    //             </li>
+    //         );
+    //     });
+    // };
 
     return (
         <div className={styles.pageContainer}>
@@ -82,18 +115,20 @@ const Layout: React.FC = () => {
                         return (
                             <li key={item.name} className={`${styles.menuItem} ${isMenuOpen ? styles.open : ''}`}>
                                 <Link
-                                    to={item.path || (hasSubItems ? item.subItems[0].path : '#')}
+                                    to={item.path || (item.subItems && item.subItems.length > 0 ? item.subItems[0].path || '#' : '#')}
                                     className={styles.menuLink}
                                     onClick={(e) => handleMenuClick(e, item.name, hasSubItems)}
                                 >
-                                    <span className={styles.menuIcon}>{item.icon}</span>
+                                    {item.icon && <span className={styles.menuIcon}>{item.icon}</span>}
                                     <span className={styles.menuText}>{item.name}</span>
                                     {hasSubItems && <span className={styles.arrowIcon}></span>}
                                 </Link>
                                 {hasSubItems && (
                                     <ul className={styles.submenu}>
                                         {item.subItems.map((subItem) => (
-                                            <li key={subItem.name}><Link to={subItem.path}>{subItem.name}</Link></li>
+                                            <li key={subItem.name}>
+                                                <Link to={subItem.path || '#'}>{subItem.name}</Link>
+                                            </li>
                                         ))}
                                     </ul>
                                 )}
@@ -114,15 +149,14 @@ const Layout: React.FC = () => {
                         <nav className={styles.topMenu}>
                             {menuItems.map((item) => (
                                 <div key={item.name} className={styles.topMenuItem}>
-                                    <Link
-                                        to={item.path || (item.subItems && item.subItems.length > 0 ? item.subItems[0].path : '#')}
-                                        className={styles.topMenuLink}
-                                    >
+                                    <Link to={item.path || (item.subItems && item.subItems.length > 0 ? item.subItems[0].path || '#' : '#')} className={styles.topMenuLink}>
                                         {item.name}
                                     </Link>
                                     {item.subItems && item.subItems.length > 0 && (
                                         <ul className={styles.topSubmenu}>
-                                            {item.subItems.map((subItem) => (<li key={subItem.name}><Link to={subItem.path}>{subItem.name}</Link></li>))}
+                                            {item.subItems.map((subItem) => (
+                                                <li key={subItem.name}><Link to={subItem.path || '#'}>{subItem.name}</Link></li>
+                                            ))}
                                         </ul>
                                     )}
                                 </div>
