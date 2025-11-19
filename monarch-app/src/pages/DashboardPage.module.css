@@ -10,6 +10,6 @@
 
 .widgetGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* 최소 너비를 400px로 변경 */
     gap: 20px;
 }

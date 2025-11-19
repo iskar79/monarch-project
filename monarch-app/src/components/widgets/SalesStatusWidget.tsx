@@ -13,6 +13,7 @@ type SalesStatusData = (string | number)[];
 
 const SalesStatusWidget: React.FC = () => {
     const [chartData, setChartData] = useState<SalesStatusData[]>([]);
+    const [showTable, setShowTable] = useState(false); // 테이블 표시 여부 상태
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -70,27 +71,32 @@ const SalesStatusWidget: React.FC = () => {
         <Widget title="매출 현황">
             {chartData.length > 1 ? (
                 <>
-                    <Chart
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <span></span> {/* 빈 span으로 공간 확보 */}
+                        <button className={styles.widgetToggleButton} onClick={() => setShowTable(!showTable)}>{showTable ? '📊 차트만 보기' : '📋 데이터 보기'}</button>
+                    </div>
+                   <Chart
                         chartType="PieChart"
                         data={chartData}
                         options={chartOptions}
                         width={"100%"}
                         height={"250px"} // 테이블 공간을 위해 차트 높이 조정
                     />
-                    <div className={styles.tableContainer} style={{ marginTop: '20px', maxHeight: '200px' }}>
+                    <div className={styles.tableContainer} style={{ 
+                        display: showTable ? 'block' : 'none',
+                        marginTop: '20px'
+                    }}>
                         <table className={`${styles.userDataTable} ${styles.tableFixedMobile}`}>
                             <thead>
                                 <tr>
                                     <th className={styles.textCenter}>영업 단계</th>
                                     <th className={styles.textRight}>건수</th>
-                                    <th className={styles.textRight}>건수</th> {/* 헤더는 이미 오른쪽 정렬 */}
                                 </tr>
                             </thead>
                             <tbody>
                                 {chartData.slice(1).map((row, index) => ( // 헤더를 제외하고 데이터만 렌더링
                                     <tr key={index}>
                                         <td>{String(row[0])}</td>
-                                        <td className={styles.textCenter}>{String(row[0])}</td> {/* 데이터 셀도 가운데 정렬로 변경 */}
                                         <td className={styles.textRight}>{Number(row[1]).toLocaleString()}</td>
                                     </tr>
                                 ))}
