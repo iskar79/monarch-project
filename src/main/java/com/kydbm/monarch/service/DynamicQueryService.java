@@ -18,6 +18,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 
+/**
+ * M_SERVICE 테이블 기반으로 동적 SQL 쿼리를 실행하는 서비스.
+ * 프론트엔드에서 전달된 파라미터에 따라 다양한 DB 작업을 수행하며,
+ * SQL Injection 방지, 동적 SQL 블록 처리, 페이징 기능을 제공합니다.
+ */
 @Service
 public class DynamicQueryService implements ApplicationContextAware {
 
@@ -26,19 +31,29 @@ public class DynamicQueryService implements ApplicationContextAware {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private ApplicationContext applicationContext;
 
+    /** Spring 컨테이너가 Bean 초기화 시 ApplicationContext를 주입합니다. */
     @Override
     public void setApplicationContext(@NonNull ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 
+    /** Spring이 필요한 의존성을 자동으로 주입하는 생성자 */
     public DynamicQueryService(MServiceMapper mServiceMapper, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.mServiceMapper = mServiceMapper;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
+    /**
+     * M_SERVICE 테이블에 정의된 동적 쿼리를 실행합니다.
+     * @param serviceName M_SERVICE 테이블의 SERVICE_NAME 컬럼 값
+     * @param methodName M_SERVICE 테이블의 METHOD_NAME 컬럼 값
+     * @param mUsiteNo 회원사 번호
+     * @param queryParams 쿼리 실행에 필요한 파라미터들을 담은 Map
+     * @return 쿼리 실행 결과 (List<Map<String, Object>> 형태)
+     */
     @Transactional
     public List<Map<String, Object>> executeDynamicQuery(String serviceName, String methodName, Long mUsiteNo, Map<String, Object> queryParams) {
-        // 1. M_SERVICE 테이블에서 쿼리문 조회 (MyBatis Mapper 사용)
+        // 1. M_SERVICE 테이블에서 쿼리문 및 실행 타입(EXEC_TYPE) 조회
         Map<String, Object> serviceInfo = mServiceMapper.findServiceQuery(mUsiteNo, serviceName, methodName);
 
         if (serviceInfo == null) {
@@ -66,29 +81,24 @@ public class DynamicQueryService implements ApplicationContextAware {
         }
 
         // 2. 동적 SQL 블록 처리 (예: /* AND USER_NAME = @USER_NAME@ */)
-        // 정규식을 사용하여 /* ... @PARAM@ ... */ 형태의 주석 블록을 찾습니다.
         Pattern dynamicBlockPattern = Pattern.compile("/\\*([\\s\\S]*?@[a-zA-Z0-9_]+@[\\s\\S]*?)\\*/");
         Matcher matcher = dynamicBlockPattern.matcher(queryStmt);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
-            String blockContent = matcher.group(1); // 주석 안의 내용
-            // 블록 안의 파라미터(@PARAM@)가 queryParams에 존재하는지 확인
+            String blockContent = matcher.group(1);
             boolean paramExists = queryParams.keySet().stream()
                     .anyMatch(key -> blockContent.contains("@" + key + "@"));
 
             if (paramExists) {
-                // 파라미터가 존재하면 주석을 제거하고 SQL 구문을 활성화
                 matcher.appendReplacement(sb, Matcher.quoteReplacement(blockContent));
             } else {
-                // 파라미터가 없으면 블록 전체를 제거
                 matcher.appendReplacement(sb, "");
             }
         }
         matcher.appendTail(sb);
         String finalQuery = sb.toString();
 
-        // 3. @PARAM@ 플레이스홀더를 :PARAM 형태로 치환
-        // NamedParameterJdbcTemplate은 SQL Injection 방지를 위해 파라미터 바인딩을 자동으로 처리합니다.
+        // 3. @PARAM@ 플레이스홀더를 :PARAM 형태로 치환 (SQL Injection 방지)
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         Pattern placeholderPattern = Pattern.compile("@[a-zA-Z0-9_]+@");
         Matcher placeholderMatcher = placeholderPattern.matcher(finalQuery);
@@ -96,9 +106,9 @@ public class DynamicQueryService implements ApplicationContextAware {
 
         while (placeholderMatcher.find()) {
             String placeholder = placeholderMatcher.group();
-            String paramName = placeholder.substring(1, placeholder.length() - 1); // @ 제거
+            String paramName = placeholder.substring(1, placeholder.length() - 1);
             Object paramValue = queryParams.get(paramName);
-            // 파라미터 이름에 'password'가 포함되면 값을 암호화합니다.
+            
             if (paramName.toLowerCase().contains("password")) {
                 PasswordEncoder passwordEncoder = applicationContext.getBean(PasswordEncoder.class);
                 paramValue = (paramValue != null) ? passwordEncoder.encode(paramValue.toString()) : null;
@@ -116,44 +126,36 @@ public class DynamicQueryService implements ApplicationContextAware {
             if ("READ".equalsIgnoreCase(execType)) {
                 return namedParameterJdbcTemplate.queryForList(executableQuery, parameters);
             } else if ("LIST".equalsIgnoreCase(execType)) {
-                // 페이징 처리를 위한 파라미터 추출
                 int page = Integer.parseInt(queryParams.getOrDefault("_page", "1").toString());
                 int size = Integer.parseInt(queryParams.getOrDefault("_size", "20").toString());
                 String sort = (String) queryParams.getOrDefault("_sort", "");
  
-                // 정렬 조건 추가
                 String orderByClause = "";
                 if (sort != null && !sort.trim().isEmpty()) {
-                    // 기본적인 SQL Injection 방지
                     if (!sort.matches("^[a-zA-Z0-9_.,\\sASCascDESCdesc]+$")) {
                         throw new IllegalArgumentException("Invalid sort parameter.");
                     }
                     orderByClause = " ORDER BY " + sort;
                 }
  
-                // 1. 전체 카운트 조회
                 String countQuery = "SELECT COUNT(*) FROM (" + executableQuery + ")";
                 Integer totalCount = namedParameterJdbcTemplate.queryForObject(countQuery, parameters, Integer.class);
  
-                // 2. 페이징된 데이터 조회
                 int startRow = (page - 1) * size;
                 int endRow = page * size;
                 String pagingQuery = "SELECT * FROM (SELECT a.*, ROWNUM rnum FROM (" + executableQuery + orderByClause + ") a WHERE ROWNUM <= " + endRow + ") WHERE rnum > " + startRow;
                 List<Map<String, Object>> data = namedParameterJdbcTemplate.queryForList(pagingQuery, parameters);
  
-                // 3. 데이터와 전체 카운트를 함께 반환
                 return List.of(Map.of("data", data, "totalCount", totalCount));
             } else if ("INSERT".equalsIgnoreCase(execType) || "UPDATE".equalsIgnoreCase(execType) || "DELETE".equalsIgnoreCase(execType)) {
                 int affectedRows = namedParameterJdbcTemplate.update(executableQuery, parameters);
-                // 변경 작업의 결과로 영향받은 행의 수를 반환
                 return List.of(Map.of("affectedRows", affectedRows));
             } else {
                 log.warn("Unsupported EXEC_TYPE: {}", execType);
                 throw new IllegalArgumentException("Unsupported EXEC_TYPE: " + execType);
             }
         } catch (Exception e) {
-            // 쿼리 실행 중 발생한 예외 처리
-            log.error("Error executing dynamic query", e);
+            log.error("Error executing dynamic query: serviceName={}, methodName={}, mUsiteNo={}, queryParams={}", serviceName, methodName, mUsiteNo, queryParams, e);
             throw new RuntimeException("Error executing dynamic query: " + e.getMessage(), e);
         }
     }

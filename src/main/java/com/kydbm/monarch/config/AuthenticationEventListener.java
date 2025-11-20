@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+/** Spring Security의 인증 이벤트를 감지하여 로그인 성공/실패 시 추가 작업을 수행합니다. */
 @Component
 public class AuthenticationEventListener {
 
@@ -19,6 +20,10 @@ public class AuthenticationEventListener {
         this.userMapper = userMapper;
     }
 
+    /**
+     * 로그인 실패(주로 비밀번호 오류) 시 호출됩니다.
+     * @param event 로그인 실패 정보를 담은 이벤트 객체
+     */
     @EventListener
     public void handleAuthenticationFailure(AuthenticationFailureBadCredentialsEvent event) {
         String username = (String) event.getAuthentication().getPrincipal();
@@ -27,6 +32,10 @@ public class AuthenticationEventListener {
         userMapper.incrementLoginFailCount(username);
     }
 
+    /**
+     * 로그인 성공 시 호출됩니다.
+     * @param event 로그인 성공 정보를 담은 이벤트 객체
+     */
     @EventListener
     public void handleAuthenticationSuccess(AuthenticationSuccessEvent event) {
         String username = ((User) event.getAuthentication().getPrincipal()).getUsername();
