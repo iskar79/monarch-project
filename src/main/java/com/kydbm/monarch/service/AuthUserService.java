@@ -1,6 +1,6 @@
 package com.kydbm.monarch.service;
 
-import com.kydbm.monarch.domain.CustomUserDetails;
+import com.kydbm.monarch.domain.AuthUser;
 import com.kydbm.monarch.mapper.UserMapper;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.LockedException;
@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.util.Collections;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
@@ -17,13 +16,13 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
+public class AuthUserService implements UserDetailsService {
 
-    private static final Logger log = LoggerFactory.getLogger(CustomUserDetailsService.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthUserService.class);
 
     private final UserMapper userMapper;
 
-    public CustomUserDetailsService(UserMapper userMapper) {
+    public AuthUserService(UserMapper userMapper) {
         this.userMapper = userMapper;
     }
 
@@ -59,7 +58,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         String password = (String) userDetails.get("USER_PASSWORD");
 
-        return new CustomUserDetails((String) userDetails.get("USER_CODE"),
+        return new AuthUser((String) userDetails.get("USER_CODE"),
                 password, enabled, accountNonExpired, credentialsNonExpired,
                 accountNonLocked, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")),
                 ((BigDecimal) userDetails.get("M_USER_NO")).longValue());

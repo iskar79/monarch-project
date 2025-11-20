@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Chart } from "react-google-charts";
-import styles from "../../Widget.module.css"; // 상위 폴더로 한 단계 더 올라가도록 경로 수정
+// ListPage.module.css를 사용하여 테이블 스타일을 일관성 있게 적용합니다.
+import styles from "../../../styles/ListPage.module.css";
 import Widget from "../../Widget";
 
 // API 응답 데이터의 타입을 명확하게 정의합니다.

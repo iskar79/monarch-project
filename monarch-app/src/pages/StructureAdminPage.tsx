@@ -68,7 +68,7 @@ const StructureAdminPage: React.FC = () => {
                 {error && <p className={styles.error}>{error}</p>}
 
                 {structureCont && (
-                    <pre style={{ backgroundColor: '#f4f4f4', padding: '1rem', borderRadius: '8px', whiteSpace: 'pre-wrap', wordBreak: 'break-all', marginTop: '1.5rem' }}>
+                    <pre style={{ backgroundColor: '#f4f4f4', color: '#333', padding: '1rem', borderRadius: '8px', whiteSpace: 'pre-wrap', wordBreak: 'break-all', marginTop: '1.5rem' }}>
                         <code>{structureCont}</code>
                     </pre>
                 )}
