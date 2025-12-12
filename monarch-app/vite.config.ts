@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite'
 // React 프로젝트를 위한 Vite 플러그인을 가져옵니다.
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 // Vite 설정을 정의하고 내보냅니다.
 export default defineConfig({
@@ -10,6 +11,9 @@ export default defineConfig({
   // 모듈 경로를 해석하는 방식을 설정합니다.
   resolve: {
     // 경로 별칭(alias)을 설정합니다.
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
   },
   // 개발 서버 관련 설정을 정의합니다.
   server: {

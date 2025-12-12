@@ -73,7 +73,7 @@ public class ApiController {
             String serviceName = "MON_COMMON";
             String methodName = "USER_INFO";
             Long mUsiteNo = 1L; // 기본 회원사 번호
-            Map<String, Object> params = Map.of("M_USER_NO", user.getMUserNo()); // AuthUser의 메소드 호출
+            Map<String, Object> params = Map.of("M_USER_NO", user.getMuser().getMUserNo()); // AuthUser를 통해 MUser 객체를 가져온 후, 사용자 번호를 조회합니다.
 
             List<Map<String, Object>> userInfoList = dynamicQueryService.executeDynamicQuery(serviceName, methodName, mUsiteNo, params);
             if (userInfoList != null && !userInfoList.isEmpty()) {
@@ -103,10 +103,14 @@ public class ApiController {
             String structureContString = dynamicGridStructure.getStructureByName(structureName, mUsiteNo);
 
             if (structureContString != null && !structureContString.trim().isEmpty()) {
-                // 1. 배열 또는 객체의 마지막에 있는 불필요한 쉼표(trailing comma)를 제거합니다.
+                // 1. JavaScript/JSON 주석 제거: // 형식의 주석을 제거합니다.
+                structureContString = structureContString.replaceAll("//.*?(?=,|\\}|\\])", "");
+                // 2. 중복 쉼표 제거: 연속된 쉼표를 하나로 통합합니다.
+                structureContString = structureContString.replaceAll(",\\s*,+", ",");
+                // 3. 배열 또는 객체의 마지막에 있는 불필요한 쉼표(trailing comma)를 제거합니다.
                 structureContString = structureContString.replaceAll(",(\\s*})", "$1");
                 structureContString = structureContString.replaceAll(",(\\s*])", "$1");
-                // 2. 줄바꿈, 탭 등 불필요한 공백을 제거하여 파싱 오류 가능성을 줄입니다.
+                // 4. 줄바꿈, 탭 등 불필요한 공백을 제거하여 파싱 오류 가능성을 줄입니다.
                 structureContString = structureContString.replaceAll("\\s+", " ").trim();
             }
             return ResponseEntity.ok(Map.of("structureCont", structureContString));

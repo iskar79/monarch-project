@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import styles from './LoginPage.module.css'; // 간단한 스타일 재사용
-import Widget from '../components/Widget';
+import Widget from '@/components/Widget';
+
+/**
+ * API 응답 데이터의 타입을 정의합니다.
+ * 백엔드에서 SNAKE_CASE로 넘어오는 필드를 그대로 따릅니다.
+ */
+interface ServiceAdminResponse {
+    QUERY_STMT: string;
+}
 
 /**
  * Service 정보 관리 페이지 컴포넌트입니다.
@@ -37,7 +45,7 @@ const ServiceAdminPage: React.FC = () => {
                 }
             });
 
-            const result = response.data && response.data.length > 0 ? response.data[0] : null;
+            const result: ServiceAdminResponse | null = response.data && response.data.length > 0 ? response.data[0] : null;
 
             if (result && result.QUERY_STMT) {
                 setQueryStmt(result.QUERY_STMT);

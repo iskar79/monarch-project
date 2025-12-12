@@ -72,11 +72,11 @@ const menuItems: MenuItem[] = [
  */
 const getMenuItemLinkPath = (item: MenuItem | SubMenuItem): string => {
     if (item.path) return item.path; // 1. path 속성이 있으면 그대로 반환
-    if (item.structureName) return `/grid/${item.structureName}`; // 2. structureName이 있으면 동적 그리드 경로 생성
+    if (item.structureName) return `/${item.structureName}`; // 2. structureName이 있으면 동적 그리드 경로 생성
     // 3. 부모 메뉴일 경우, 첫 번째 자식 메뉴의 경로를 대표 경로로 사용
     if ('subItems' in item && item.subItems && item.subItems.length > 0) {
         const firstSub = item.subItems[0];
-        return firstSub.path || (firstSub.structureName ? `/grid/${firstSub.structureName}` : '#');
+        return firstSub.path || (firstSub.structureName ? `/${firstSub.structureName}` : '#');
     }
     return '#'; // 모든 조건에 해당하지 않으면 이동하지 않는 링크 반환
 };

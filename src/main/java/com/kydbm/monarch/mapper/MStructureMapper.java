@@ -22,5 +22,8 @@ public interface MStructureMapper {
             FROM M_STRUCTURE
             WHERE STRUCTURE_NAME = #{structureName} AND M_USITE_NO = #{usiteNo}
             """)
-    String findByName(@Param("structureName") String structureName, @Param("usiteNo") Long usiteNo);
+    String findByName(
+            @Param("structureName") String structureName, 
+            @Param("usiteNo") Long usiteNo
+    );
 }

@@ -20,11 +20,12 @@ const App: React.FC = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout/>}>
           <Route path="/" element={<DashboardPage />} /> {/* 대시보드 */}
-          <Route path="/admin/dev" element={<StructureAdminPage />} /> {/* 기존 "개발정보" 경로 유지 */}
-          {/* 동적 라우트: :structureName 부분이 변수로 처리됩니다. */}
-          <Route path="/grid/:structureName" element={<DynamicGridPage />} />
           <Route path="/admin/structure" element={<StructureAdminPage />} /> {/* "Structure정보" 페이지 경로 새로 추가 */}
           <Route path="/admin/service" element={<ServiceAdminPage />} /> {/* "Service정보" 페이지 경로로 변경 */}
+
+          {/* 동적 라우트: :structureName 부분이 변수로 처리됩니다. */}
+          {/* 다른 구체적인 경로들보다 뒤에 위치시켜 의도치 않은 매칭을 방지합니다. */}
+          <Route path="/:structureName" element={<DynamicGridPage />} />
         </Route>
       </Route>
 

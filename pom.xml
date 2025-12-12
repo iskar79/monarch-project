@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.7</version>
+		<version>3.5.8</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<!-- 프로젝트의 고유 식별자 (Group ID) -->
@@ -17,7 +17,7 @@
 	<!-- 프로젝트 버전 -->
 	<version>0.0.1-SNAPSHOT</version>
 	<!-- 패키징 방식 (jar, war 등) -->
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	<!-- 프로젝트 이름 -->
 	<name>monarch</name>
 	<!-- 프로젝트 설명 -->
@@ -56,6 +56,12 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<!-- MyBatis 프레임워크와 스프링 부트 연동 지원 -->
+		<!-- WAR 배포를 위해 내장 톰캣을 제외하고, provided 스코프로 변경합니다. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.mybatis.spring.boot</groupId>
 			<artifactId>mybatis-spring-boot-starter</artifactId>

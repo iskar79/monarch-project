@@ -1,15 +1,14 @@
 package com.kydbm.monarch.service;
 
 import com.kydbm.monarch.domain.AuthUser;
+import com.kydbm.monarch.domain.MUser;
 import com.kydbm.monarch.mapper.UserMapper;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.LockedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import java.util.Collections;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
 import java.math.BigDecimal;
@@ -60,25 +59,24 @@ public class AuthUserService implements UserDetailsService {
             }
         }
 
-        // 계정 상태를 설정합니다.
-        boolean enabled = "1".equals(String.valueOf(userDetails.get("USE_FLAG")));
-        log.info("User '{}' enabled status: {}", username, enabled);
-        boolean accountNonLocked = true; // 위에서 잠김 여부를 이미 체크했으므로 기본값은 true
-        boolean credentialsNonExpired = true; // 필요시 PW_UPD_DATE로 만료 여부 체크 가능
-        boolean accountNonExpired = true; // 계정 만료 정책은 현재 사용 안 함
+        // DB 조회 결과를 MUser 객체로 변환합니다.
+        MUser muser = new MUser();
+        muser.setMUserNo(((BigDecimal) userDetails.get("M_USER_NO")).longValue());
+        muser.setUserCode((String) userDetails.get("USER_CODE"));
+        muser.setUserPassword((String) userDetails.get("USER_PASSWORD"));
+        muser.setUseFlag(String.valueOf(userDetails.get("USE_FLAG")));
+        
+        Object connDurObj = userDetails.get("CONN_DUR");
+        if (connDurObj instanceof BigDecimal) {
+            muser.setConnDur(((BigDecimal) connDurObj).longValue());
+        }
 
-        String password = (String) userDetails.get("USER_PASSWORD");
+        Object failCntObj = userDetails.get("LOGIN_FAIL_CNT");
+        if (failCntObj instanceof BigDecimal) {
+            muser.setLoginFailCnt(((BigDecimal) failCntObj).longValue());
+        }
 
-        // Spring Security가 사용할 AuthUser 객체를 생성하여 반환합니다.
-        return new AuthUser(
-                (String) userDetails.get("USER_CODE"),
-                password,
-                enabled,
-                accountNonExpired,
-                credentialsNonExpired,
-                accountNonLocked,
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")), // 모든 사용자에게 기본 역할 부여
-                ((BigDecimal) userDetails.get("M_USER_NO")).longValue()
-        );
+        // MUser 객체를 AuthUser로 감싸서 반환합니다.
+        return new AuthUser(muser);
     }
 }
